@@ -67,11 +67,5 @@ def pedido():
 
 @pytest.fixture(scope="session")
 def csv_preparado():
-    """CSV preparado pequeño construido a partir del dataset real."""
-    import pandas as pd
-
-    from app.ml import entrenamiento as ml
-
-    df = pd.read_csv(RAIZ / "data" / "DataCoSupplyChainDataset.csv", encoding="latin-1", nrows=4000)
-    datos, _ = ml.preparar_datos(df)
-    return datos.to_csv(index=False).encode("utf-8")
+    """CSV preparado con 4.000 registros reales (incluido en el repositorio para que la CI no dependa del dataset completo)."""
+    return (Path(__file__).parent / "datos" / "muestra_preparada.csv").read_bytes()
