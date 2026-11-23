@@ -43,6 +43,28 @@ def test_entrenar_requiere_ambas_clases():
         ml.entrenar(datos)
 
 
-def test_cumple_calidad():
-    assert ml.cumple_calidad({"accuracy": 0.74, "f1_score": 0.73, "roc_auc": 0.83}, 0.7, 0.7, 0.8)
-    assert not ml.cumple_calidad({"accuracy": 0.74, "f1_score": 0.65, "roc_auc": 0.83}, 0.7, 0.7, 0.8)
+@pytest.mark.parametrize(
+    ("accuracy", "f1_score", "roc_auc", "esperado"),
+    [
+        pytest.param(0.649, 0.699, 0.799, False, id="ninguna-cumple"),
+        pytest.param(0.65, 0.699, 0.799, True, id="solo-accuracy-en-el-minimo"),
+        pytest.param(0.649, 0.70, 0.799, True, id="solo-f1-en-el-minimo"),
+        pytest.param(0.649, 0.699, 0.80, True, id="solo-roc-auc-en-el-minimo"),
+        pytest.param(0.66, 0.71, 0.799, True, id="cumplen-accuracy-y-f1"),
+        pytest.param(0.66, 0.699, 0.81, True, id="cumplen-accuracy-y-roc-auc"),
+        pytest.param(0.649, 0.71, 0.81, True, id="cumplen-f1-y-roc-auc"),
+        pytest.param(0.66, 0.71, 0.81, True, id="todas-cumplen"),
+    ],
+)
+def test_cumple_calidad_con_al_menos_una_metrica(accuracy, f1_score, roc_auc, esperado):
+    # Usar mínimos distintos detecta si se aplica a una métrica el umbral de otra.
+    metricas = {"accuracy": accuracy, "f1_score": f1_score, "roc_auc": roc_auc}
+    assert ml.cumple_calidad(metricas, min_accuracy=0.65, min_f1=0.70, min_roc_auc=0.80) is esperado
+
+
+def test_muestra_csv_preparada_contiene_registros_validos_de_ambas_clases(csv_preparado):
+    datos, formato = ml.preparar_datos(ml.leer_csv(csv_preparado))
+
+    assert formato == "preparado"
+    assert len(datos) == 4000
+    assert set(datos[ml.OBJETIVO]) == {0, 1}
