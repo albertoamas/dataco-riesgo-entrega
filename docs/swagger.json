@@ -1,0 +1,1235 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DataCo - Servicio de IA de riesgo de entrega tardía",
+    "description": "API REST que expone un modelo de clasificación (HistGradientBoosting) entrenado con el dataset **DataCo Smart Supply Chain** para predecir si un pedido tendrá entrega tardía.\n\nPermite: realizar predicciones, consultar el historial, consultar métricas, enviar archivos de entrenamiento y re-entrenar el modelo.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/predicciones": {
+      "post": {
+        "tags": [
+          "Predicciones"
+        ],
+        "summary": "Enviar datos al modelo y obtener la predicción",
+        "description": "Predice si un pedido tendrá **entrega tardía** (1) o llegará **a tiempo** (0) y guarda la predicción en el historial.",
+        "operationId": "crear_prediccion_api_predicciones_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrediccionEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrediccionSalida"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Predicciones"
+        ],
+        "summary": "Historial de predicciones previas",
+        "description": "Devuelve los datos enviados y el resultado de cada predicción, de la más reciente a la más antigua.",
+        "operationId": "listar_predicciones_api_predicciones_get",
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamano",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 20,
+              "title": "Tamano"
+            }
+          },
+          {
+            "name": "prediccion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 1,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por resultado (0 o 1)",
+              "title": "Prediccion"
+            },
+            "description": "Filtrar por resultado (0 o 1)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistorialPredicciones"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/predicciones/{prediccion_id}": {
+      "get": {
+        "tags": [
+          "Predicciones"
+        ],
+        "summary": "Detalle de una predicción",
+        "operationId": "obtener_prediccion_api_predicciones__prediccion_id__get",
+        "parameters": [
+          {
+            "name": "prediccion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Prediccion Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrediccionSalida"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/opciones": {
+      "get": {
+        "tags": [
+          "Predicciones"
+        ],
+        "summary": "Valores válidos de las variables categóricas",
+        "description": "Valores aceptados por el modelo activo para cada variable categórica (para construir el formulario).",
+        "operationId": "obtener_opciones_api_opciones_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Opciones"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/destinos": {
+      "get": {
+        "tags": [
+          "Predicciones"
+        ],
+        "summary": "Combinaciones válidas de mercado, región y país",
+        "description": "Combinaciones mercado / región / país presentes en los datos de entrenamiento activos (para filtrar el formulario en cascada).",
+        "operationId": "listar_destinos_api_destinos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Destino"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Destinos Api Destinos Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/metricas": {
+      "get": {
+        "tags": [
+          "Modelo"
+        ],
+        "summary": "Métricas de rendimiento del modelo activo",
+        "description": "Accuracy, precision, recall, F1, ROC-AUC y matriz de confusión del modelo activo, calculadas sobre el conjunto de prueba (20%).",
+        "operationId": "obtener_metricas_api_metricas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricasModeloSalida"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/modelos": {
+      "get": {
+        "tags": [
+          "Modelo"
+        ],
+        "summary": "Historial de versiones del modelo",
+        "description": "Todas las versiones entrenadas con sus métricas, de la más reciente a la más antigua.",
+        "operationId": "listar_modelos_api_modelos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VersionModeloSalida"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Modelos Api Modelos Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/modelos/reentrenar": {
+      "post": {
+        "tags": [
+          "Modelo"
+        ],
+        "summary": "Re-entrenar el modelo con los datos actualizados",
+        "description": "Entrena una nueva versión con todos los datos de entrenamiento activos en la base de datos.\n\nLa nueva versión solo reemplaza al modelo activo si cumple el criterio de calidad (CRISP-ML(Q)).",
+        "operationId": "reentrenar_api_modelos_reentrenar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ReentrenamientoEntrada"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Entrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReentrenamientoSalida"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/modelos/{version}/activar": {
+      "post": {
+        "tags": [
+          "Modelo"
+        ],
+        "summary": "Activar una versión anterior (rollback)",
+        "operationId": "activar_version_api_modelos__version__activar_post",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionModeloSalida"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets": {
+      "get": {
+        "tags": [
+          "Datos de entrenamiento"
+        ],
+        "summary": "Archivos de entrenamiento cargados",
+        "operationId": "listar_datasets_api_datasets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DatasetSalida"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Datasets Api Datasets Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Datos de entrenamiento"
+        ],
+        "summary": "Enviar un archivo de entrenamiento (CSV)",
+        "description": "Acepta dos formatos:\n\n- **dataco**: el CSV original `DataCoSupplyChainDataset.csv` (se preparan las columnas automáticamente).\n- **preparado**: CSV con las columnas `payment_type, shipping_mode, market, order_region, order_country,\n  customer_segment, category_name, quantity, product_price, discount_rate, order_month,\n  order_day_of_week, order_hour, late_delivery_risk`.",
+        "operationId": "cargar_dataset_api_datasets_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_cargar_dataset_api_datasets_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CargaDatasetSalida"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/salud": {
+      "get": {
+        "tags": [
+          "Sistema"
+        ],
+        "summary": "Estado del servicio",
+        "operationId": "salud_api_salud_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Salud"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_cargar_dataset_api_datasets_post": {
+        "properties": {
+          "archivo": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Archivo",
+            "description": "CSV original de DataCo o CSV con las columnas preparadas"
+          },
+          "modo": {
+            "type": "string",
+            "enum": [
+              "agregar",
+              "reemplazar"
+            ],
+            "title": "Modo",
+            "description": "agregar: suma los datos a los existentes; reemplazar: desactiva los datasets anteriores",
+            "default": "agregar"
+          },
+          "reentrenar": {
+            "type": "boolean",
+            "title": "Reentrenar",
+            "description": "Re-entrenar el modelo inmediatamente después de la carga",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "archivo"
+        ],
+        "title": "Body_cargar_dataset_api_datasets_post"
+      },
+      "CargaDatasetSalida": {
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "dataset": {
+            "$ref": "#/components/schemas/DatasetSalida"
+          },
+          "registros_descartados": {
+            "type": "integer",
+            "title": "Registros Descartados"
+          },
+          "total_registros_activos": {
+            "type": "integer",
+            "title": "Total Registros Activos"
+          },
+          "reentrenamiento": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReentrenamientoSalida"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "mensaje",
+          "dataset",
+          "registros_descartados",
+          "total_registros_activos"
+        ],
+        "title": "CargaDatasetSalida"
+      },
+      "CriterioCalidad": {
+        "properties": {
+          "min_accuracy": {
+            "type": "number",
+            "title": "Min Accuracy"
+          },
+          "min_f1": {
+            "type": "number",
+            "title": "Min F1"
+          },
+          "min_roc_auc": {
+            "type": "number",
+            "title": "Min Roc Auc"
+          }
+        },
+        "type": "object",
+        "required": [
+          "min_accuracy",
+          "min_f1",
+          "min_roc_auc"
+        ],
+        "title": "CriterioCalidad"
+      },
+      "DatasetSalida": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nombre_archivo": {
+            "type": "string",
+            "title": "Nombre Archivo"
+          },
+          "formato": {
+            "type": "string",
+            "title": "Formato"
+          },
+          "total_registros": {
+            "type": "integer",
+            "title": "Total Registros"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          },
+          "fecha_carga": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Carga"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre_archivo",
+          "formato",
+          "total_registros",
+          "activo",
+          "fecha_carga"
+        ],
+        "title": "DatasetSalida"
+      },
+      "Destino": {
+        "properties": {
+          "market": {
+            "type": "string",
+            "title": "Market"
+          },
+          "order_region": {
+            "type": "string",
+            "title": "Order Region"
+          },
+          "order_country": {
+            "type": "string",
+            "title": "Order Country"
+          }
+        },
+        "type": "object",
+        "required": [
+          "market",
+          "order_region",
+          "order_country"
+        ],
+        "title": "Destino"
+      },
+      "ErrorRespuesta": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorRespuesta"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HistorialPredicciones": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "pagina": {
+            "type": "integer",
+            "title": "Pagina"
+          },
+          "tamano": {
+            "type": "integer",
+            "title": "Tamano"
+          },
+          "elementos": {
+            "items": {
+              "$ref": "#/components/schemas/PrediccionSalida"
+            },
+            "type": "array",
+            "title": "Elementos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "pagina",
+          "tamano",
+          "elementos"
+        ],
+        "title": "HistorialPredicciones"
+      },
+      "Metricas": {
+        "properties": {
+          "accuracy": {
+            "type": "number",
+            "title": "Accuracy"
+          },
+          "precision": {
+            "type": "number",
+            "title": "Precision"
+          },
+          "recall": {
+            "type": "number",
+            "title": "Recall"
+          },
+          "f1_score": {
+            "type": "number",
+            "title": "F1 Score"
+          },
+          "roc_auc": {
+            "type": "number",
+            "title": "Roc Auc"
+          }
+        },
+        "type": "object",
+        "required": [
+          "accuracy",
+          "precision",
+          "recall",
+          "f1_score",
+          "roc_auc"
+        ],
+        "title": "Metricas"
+      },
+      "MetricasModeloSalida": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "algoritmo": {
+            "type": "string",
+            "title": "Algoritmo"
+          },
+          "hiperparametros": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Hiperparametros"
+          },
+          "metricas": {
+            "$ref": "#/components/schemas/Metricas"
+          },
+          "matriz_confusion": {
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Matriz Confusion"
+          },
+          "registros_entrenamiento": {
+            "type": "integer",
+            "title": "Registros Entrenamiento"
+          },
+          "registros_prueba": {
+            "type": "integer",
+            "title": "Registros Prueba"
+          },
+          "cumple_calidad": {
+            "type": "boolean",
+            "title": "Cumple Calidad"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          },
+          "origen": {
+            "type": "string",
+            "title": "Origen"
+          },
+          "fecha_entrenamiento": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Entrenamiento"
+          },
+          "criterio_calidad": {
+            "$ref": "#/components/schemas/CriterioCalidad"
+          },
+          "total_predicciones": {
+            "type": "integer",
+            "title": "Total Predicciones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "algoritmo",
+          "hiperparametros",
+          "metricas",
+          "matriz_confusion",
+          "registros_entrenamiento",
+          "registros_prueba",
+          "cumple_calidad",
+          "activo",
+          "origen",
+          "fecha_entrenamiento",
+          "criterio_calidad",
+          "total_predicciones"
+        ],
+        "title": "MetricasModeloSalida"
+      },
+      "Opciones": {
+        "properties": {
+          "version_modelo": {
+            "type": "integer",
+            "title": "Version Modelo"
+          },
+          "opciones": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Opciones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version_modelo",
+          "opciones"
+        ],
+        "title": "Opciones"
+      },
+      "PrediccionEntrada": {
+        "properties": {
+          "payment_type": {
+            "type": "string",
+            "title": "Payment Type",
+            "description": "Tipo de pago: DEBIT, TRANSFER, PAYMENT, CASH"
+          },
+          "shipping_mode": {
+            "type": "string",
+            "title": "Shipping Mode",
+            "description": "Modo de envio: Standard Class, Second Class, First Class, Same Day"
+          },
+          "market": {
+            "type": "string",
+            "title": "Market",
+            "description": "Mercado de destino"
+          },
+          "order_region": {
+            "type": "string",
+            "title": "Order Region",
+            "description": "Region de destino del pedido"
+          },
+          "order_country": {
+            "type": "string",
+            "title": "Order Country",
+            "description": "Pais de destino del pedido"
+          },
+          "customer_segment": {
+            "type": "string",
+            "title": "Customer Segment",
+            "description": "Segmento del cliente: Consumer, Corporate, Home Office"
+          },
+          "category_name": {
+            "type": "string",
+            "title": "Category Name",
+            "description": "Categoria del producto"
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Quantity",
+            "description": "Cantidad de unidades"
+          },
+          "product_price": {
+            "type": "number",
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Product Price",
+            "description": "Precio unitario del producto"
+          },
+          "discount_rate": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Discount Rate",
+            "description": "Tasa de descuento (0 a 1)"
+          },
+          "order_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Order Date",
+            "description": "Fecha y hora del pedido; se usan mes, dia de la semana y hora"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payment_type",
+          "shipping_mode",
+          "market",
+          "order_region",
+          "order_country",
+          "customer_segment",
+          "category_name",
+          "quantity",
+          "product_price",
+          "discount_rate",
+          "order_date"
+        ],
+        "title": "PrediccionEntrada",
+        "description": "Datos de un pedido al momento de registrarlo.",
+        "example": {
+          "category_name": "Cleats",
+          "customer_segment": "Consumer",
+          "discount_rate": 0.05,
+          "market": "LATAM",
+          "order_country": "Brasil",
+          "order_date": "2026-11-23T14:30:00",
+          "order_region": "South America",
+          "payment_type": "DEBIT",
+          "product_price": 59.99,
+          "quantity": 2,
+          "shipping_mode": "First Class"
+        }
+      },
+      "PrediccionSalida": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "prediccion": {
+            "type": "integer",
+            "title": "Prediccion",
+            "description": "1 = entrega tardia, 0 = a tiempo"
+          },
+          "etiqueta": {
+            "type": "string",
+            "title": "Etiqueta"
+          },
+          "probabilidad_tardia": {
+            "type": "number",
+            "title": "Probabilidad Tardia"
+          },
+          "version_modelo": {
+            "type": "integer",
+            "title": "Version Modelo"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha"
+          },
+          "datos_entrada": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Datos Entrada"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "prediccion",
+          "etiqueta",
+          "probabilidad_tardia",
+          "version_modelo",
+          "fecha",
+          "datos_entrada"
+        ],
+        "title": "PrediccionSalida"
+      },
+      "ReentrenamientoEntrada": {
+        "properties": {
+          "buscar_hiperparametros": {
+            "type": "boolean",
+            "title": "Buscar Hiperparametros",
+            "description": "Ejecuta GridSearchCV (tarda varios minutos). Si es false usa los mejores hiperparametros del notebook",
+            "default": false
+          },
+          "activar_si_cumple": {
+            "type": "boolean",
+            "title": "Activar Si Cumple",
+            "description": "Activa la nueva version solo si cumple el criterio de calidad",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "ReentrenamientoEntrada"
+      },
+      "ReentrenamientoSalida": {
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "activado": {
+            "type": "boolean",
+            "title": "Activado"
+          },
+          "nueva_version": {
+            "$ref": "#/components/schemas/VersionModeloSalida"
+          },
+          "version_anterior": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionModeloSalida"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duracion_segundos": {
+            "type": "number",
+            "title": "Duracion Segundos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mensaje",
+          "activado",
+          "nueva_version",
+          "version_anterior",
+          "duracion_segundos"
+        ],
+        "title": "ReentrenamientoSalida"
+      },
+      "Salud": {
+        "properties": {
+          "estado": {
+            "type": "string",
+            "const": "ok",
+            "title": "Estado"
+          },
+          "base_datos": {
+            "type": "boolean",
+            "title": "Base Datos"
+          },
+          "modelo_cargado": {
+            "type": "boolean",
+            "title": "Modelo Cargado"
+          },
+          "version_modelo": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Modelo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "estado",
+          "base_datos",
+          "modelo_cargado",
+          "version_modelo"
+        ],
+        "title": "Salud"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VersionModeloSalida": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "algoritmo": {
+            "type": "string",
+            "title": "Algoritmo"
+          },
+          "hiperparametros": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Hiperparametros"
+          },
+          "metricas": {
+            "$ref": "#/components/schemas/Metricas"
+          },
+          "matriz_confusion": {
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Matriz Confusion"
+          },
+          "registros_entrenamiento": {
+            "type": "integer",
+            "title": "Registros Entrenamiento"
+          },
+          "registros_prueba": {
+            "type": "integer",
+            "title": "Registros Prueba"
+          },
+          "cumple_calidad": {
+            "type": "boolean",
+            "title": "Cumple Calidad"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          },
+          "origen": {
+            "type": "string",
+            "title": "Origen"
+          },
+          "fecha_entrenamiento": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Entrenamiento"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "algoritmo",
+          "hiperparametros",
+          "metricas",
+          "matriz_confusion",
+          "registros_entrenamiento",
+          "registros_prueba",
+          "cumple_calidad",
+          "activo",
+          "origen",
+          "fecha_entrenamiento"
+        ],
+        "title": "VersionModeloSalida"
+      }
+    }
+  }
+}

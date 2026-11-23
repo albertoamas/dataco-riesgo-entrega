@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Figura 5. Flujo de re-entrenamiento</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&amp;family=Barlow+Condensed:wght@600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1d5fae}a:hover{color:#174b8a}
+</style>
+</helmet>
+<div style="position: relative; width: 1376px; height: 600px; background: #ffffff; font-family: 'Barlow', sans-serif; color: #22313c">
+<svg role="img" aria-label="De Cargar CSV a Preparar datos" width="95" height="8" viewBox="0 0 95 8" preserveAspectRatio="none" style="position: absolute; left: 304px; top: 216px; width: 95px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-1" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 0 4 L 91 4" marker-end="url(#dc-arrow-head-filled-1)"></path></svg>
+<svg role="img" aria-label="De Preparar datos a Entrenar y evaluar" width="95" height="8" viewBox="0 0 95 8" preserveAspectRatio="none" style="position: absolute; left: 640px; top: 216px; width: 95px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-2" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 0 4 L 91 4" marker-end="url(#dc-arrow-head-filled-2)"></path></svg>
+<svg role="img" aria-label="De Entrenar y evaluar a la pregunta de si cumple el criterio de calidad" width="8" height="87" viewBox="0 0 8 87" preserveAspectRatio="none" style="position: absolute; left: 852px; top: 264px; width: 8px; height: 87px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-3" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 83" marker-end="url(#dc-arrow-head-filled-3)"></path></svg>
+<svg role="img" aria-label="Del criterio de calidad a Guardar como inactiva, si no se cumple" width="95" height="8" viewBox="0 0 95 8" preserveAspectRatio="none" style="position: absolute; left: 641px; top: 420px; width: 95px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-4" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 95 4 L 4 4" marker-end="url(#dc-arrow-head-filled-4)"></path></svg>
+<svg role="img" aria-label="Del criterio de calidad a Activar versión N, si se cumple" width="95" height="8" viewBox="0 0 95 8" preserveAspectRatio="none" style="position: absolute; left: 976px; top: 420px; width: 95px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-5" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 0 4 L 91 4" marker-end="url(#dc-arrow-head-filled-5)"></path></svg>
+<div style="position: absolute; left: 64px; top: 48px; font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 600; line-height: 40px">Figura 9. Flujo de reentrenamiento con control de calidad</div>
+<div style="position: absolute; left: 64px; top: 92px; font-size: 18px; line-height: 24px; color: #4f5e69">Una versión nueva solo reemplaza al modelo activo si cumple el criterio de calidad de la fase 1</div>
+<div style="position: absolute; left: 64px; top: 176px; width: 240px; height: 88px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>Cargar CSV</b><br>POST /api/datasets</span></div>
+<div style="position: absolute; left: 400px; top: 176px; width: 240px; height: 88px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>Preparar datos</b><br>sin columnas con fuga</span></div>
+<div style="position: absolute; left: 736px; top: 176px; width: 240px; height: 88px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>Entrenar y evaluar</b><br>con el 20 % de prueba</span></div>
+<div style="position: absolute; left: 736px; top: 352px; width: 240px; height: 144px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 22px; background: #dce3e8; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%)"><span><b>¿Cumple el<br>criterio?</b></span></div>
+<div style="position: absolute; left: 400px; top: 380px; width: 240px; height: 88px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>Guardar como inactiva</b><br>sigue el modelo anterior</span></div>
+<div style="position: absolute; left: 1072px; top: 380px; width: 240px; height: 88px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #fdf0c4; border: 2px solid #e0a400; border-radius: 10px"><span><b>Activar versión N</b><br>reemplaza al activo</span></div>
+<div style="position: absolute; left: 700px; top: 396px; width: 32px; text-align: center; font-size: 14px; line-height: 16px; color: #4f5e69">no</div>
+<div style="position: absolute; left: 984px; top: 396px; width: 32px; text-align: center; font-size: 14px; line-height: 16px; color: #4f5e69">sí</div>
+<div style="position: absolute; left: 64px; top: 528px; font-size: 15px; line-height: 20px; color: #4f5e69">En ambos casos la API responde con la comparación de métricas entre la versión anterior y la nueva.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1376,"height":600}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

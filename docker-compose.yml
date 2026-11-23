@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dataco_db
+    environment:
+      POSTGRES_USER: dataco
+      POSTGRES_PASSWORD: dataco
+      POSTGRES_DB: dataco
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - dataco_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dataco -d dataco"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dataco_pgdata:

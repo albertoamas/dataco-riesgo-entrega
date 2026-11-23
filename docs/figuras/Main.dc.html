@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Figura 1. Arquitectura de la solución</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&amp;family=Barlow+Condensed:wght@600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1d5fae}a:hover{color:#174b8a}
+</style>
+</helmet>
+<div style="position: relative; width: 1200px; height: 744px; background: #ffffff; font-family: 'Barlow', sans-serif; color: #22313c">
+<div style="position: absolute; left: 424px; top: 336px; width: 352px; height: 344px; box-sizing: border-box; background: #f3f6f8; border: 1.5px solid #c9d2d9; border-radius: 14px"></div>
+<svg role="img" aria-label="Del CSV DataCo al Notebook Jupyter, para entrenar" width="143" height="8" viewBox="0 0 143 8" preserveAspectRatio="none" style="position: absolute; left: 304px; top: 208px; width: 143px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-1" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 0 4 L 139 4" marker-end="url(#dc-arrow-head-filled-1)"></path></svg>
+<svg role="img" aria-label="Del Notebook Jupyter al Servicio de IA, que recibe el modelo v1" width="8" height="79" viewBox="0 0 8 79" preserveAspectRatio="none" style="position: absolute; left: 596px; top: 256px; width: 8px; height: 79px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-2" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 75" marker-end="url(#dc-arrow-head-filled-2)"></path></svg>
+<svg aria-hidden="true" width="8" height="164" viewBox="0 0 8 164" preserveAspectRatio="none" style="position: absolute; left: 180px; top: 256px; width: 8px; height: 164px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 4 0 L 4 164"></path></svg>
+<svg role="img" aria-label="Del CSV DataCo a la API REST, cuando se envía un archivo de entrenamiento" width="263" height="8" viewBox="0 0 263 8" preserveAspectRatio="none" style="position: absolute; left: 184px; top: 416px; width: 263px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-3" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 0 4 L 259 4" marker-end="url(#dc-arrow-head-filled-3)"></path></svg>
+<svg role="img" aria-label="De PostgreSQL al Módulo ML, que lee los datos de entrenamiento" width="143" height="8" viewBox="0 0 143 8" preserveAspectRatio="none" style="position: absolute; left: 304px; top: 508px; width: 143px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-4" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 0 4 L 139 4" marker-end="url(#dc-arrow-head-filled-4)"></path></svg>
+<svg role="img" aria-label="Del Módulo ML a PostgreSQL, que guarda versiones y predicciones" width="143" height="8" viewBox="0 0 143 8" preserveAspectRatio="none" style="position: absolute; left: 305px; top: 532px; width: 143px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-5" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 143 4 L 4 4" marker-end="url(#dc-arrow-head-filled-5)"></path></svg>
+<svg role="img" aria-label="Del Analista de logística al Cliente web, que usa" width="8" height="127" viewBox="0 0 8 127" preserveAspectRatio="none" style="position: absolute; left: 1012px; top: 256px; width: 8px; height: 127px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-6" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 123" marker-end="url(#dc-arrow-head-filled-6)"></path></svg>
+<svg role="img" aria-label="De la API REST al Cliente web, que recibe la respuesta en JSON" width="143" height="8" viewBox="0 0 143 8" preserveAspectRatio="none" style="position: absolute; left: 752px; top: 404px; width: 143px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-7" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 0 4 L 139 4" marker-end="url(#dc-arrow-head-filled-7)"></path></svg>
+<svg role="img" aria-label="Del Cliente web a la API REST, que recibe las peticiones" width="143" height="8" viewBox="0 0 143 8" preserveAspectRatio="none" style="position: absolute; left: 753px; top: 428px; width: 143px; height: 8px; overflow: visible; fill: none; stroke: #6b7984; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-8" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#6b7984" stroke="none" style="stroke: none; fill: #6b7984; fill: context-stroke"/></marker></defs><path d="M 143 4 L 4 4" marker-end="url(#dc-arrow-head-filled-8)"></path></svg>
+<div style="position: absolute; left: 64px; top: 48px; font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 600; line-height: 40px">Figura 1. Arquitectura de la solución</div>
+<div style="position: absolute; left: 64px; top: 92px; font-size: 18px; line-height: 24px; color: #4f5e69">El modelo se entrena en Jupyter y se sirve con una API que usa el cliente web</div>
+<div style="position: absolute; left: 64px; top: 168px; width: 240px; height: 88px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>CSV DataCo</b><br>180.519 registros</span></div>
+<div style="position: absolute; left: 448px; top: 168px; width: 304px; height: 88px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>Notebook Jupyter</b><br>CRISP-ML(Q), fases 1 a 4</span></div>
+<div style="position: absolute; left: 896px; top: 168px; width: 240px; height: 88px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>Analista de logística</b><br>usuario</span></div>
+<div style="position: absolute; left: 448px; top: 384px; width: 304px; height: 72px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #fdf0c4; border: 2px solid #e0a400; border-radius: 10px"><span><b>API REST + Swagger</b><br>FastAPI</span></div>
+<div style="position: absolute; left: 448px; top: 488px; width: 304px; height: 72px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>Módulo ML</b><br>scikit-learn</span></div>
+<div style="position: absolute; left: 448px; top: 592px; width: 304px; height: 64px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px">modelo_vN.joblib</div>
+<div style="position: absolute; left: 64px; top: 488px; width: 240px; height: 72px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>PostgreSQL 16</b><br>4 tablas</span></div>
+<div style="position: absolute; left: 896px; top: 384px; width: 240px; height: 72px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; line-height: 24px; background: #ffffff; border: 1.5px solid #9aa8b3; border-radius: 10px"><span><b>Cliente web</b><br>React + TypeScript</span></div>
+<div style="position: absolute; left: 440px; top: 346px; font-size: 15px; line-height: 20px; font-weight: 600; color: #4f5e69">Servicio de IA (Python)</div>
+<div style="position: absolute; left: 612px; top: 287px; width: 168px; font-size: 14px; line-height: 16px; color: #4f5e69">exporta el modelo v1</div>
+<div style="position: absolute; left: 232px; top: 392px; width: 144px; text-align: center; font-size: 14px; line-height: 16px; color: #4f5e69">POST /api/datasets</div>
+<div style="position: absolute; left: 324px; top: 484px; width: 80px; text-align: center; font-size: 14px; line-height: 16px; color: #4f5e69">SQLAlchemy</div>
+<div style="position: absolute; left: 1028px; top: 311px; width: 32px; font-size: 14px; line-height: 16px; color: #4f5e69">usa</div>
+<div style="position: absolute; left: 812px; top: 444px; width: 48px; text-align: center; font-size: 14px; line-height: 16px; color: #4f5e69">JSON</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":744}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
