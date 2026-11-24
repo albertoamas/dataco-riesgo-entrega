@@ -180,4 +180,4 @@ def obtener_opciones(datos: pd.DataFrame) -> dict:
 def cumple_calidad(metricas: dict, min_accuracy: float, min_f1: float, min_roc_auc: float) -> bool:
     """Indica si el modelo cumple todos los mínimos del criterio de calidad (fase 1 de CRISP-ML(Q))."""
     minimos = {"accuracy": min_accuracy, "f1_score": min_f1, "roc_auc": min_roc_auc}
-    return any(metricas[nombre] >= minimo for nombre, minimo in minimos.items())
+    return all(metricas[nombre] >= minimo for nombre, minimo in minimos.items())
