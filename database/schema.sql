@@ -7,6 +7,7 @@
 -- =============================================================
 
 DROP TABLE IF EXISTS predicciones;
+DROP TABLE IF EXISTS versiones_datasets;
 DROP TABLE IF EXISTS versiones_modelo;
 DROP TABLE IF EXISTS datos_entrenamiento;
 DROP TABLE IF EXISTS datasets;
@@ -64,6 +65,14 @@ CREATE TABLE versiones_modelo (
 );
 -- Solo puede existir un modelo activo a la vez
 CREATE UNIQUE INDEX idx_un_modelo_activo ON versiones_modelo(activo) WHERE activo;
+
+-- Trazabilidad: archivos de entrenamiento con los que se entreno cada version (relacion N a N)
+CREATE TABLE versiones_datasets (
+    version_modelo_id  INTEGER NOT NULL REFERENCES versiones_modelo(id) ON DELETE CASCADE,
+    dataset_id         INTEGER NOT NULL REFERENCES datasets(id) ON DELETE CASCADE,
+    PRIMARY KEY (version_modelo_id, dataset_id)
+);
+CREATE INDEX idx_versiones_datasets_dataset ON versiones_datasets(dataset_id);
 
 -- Historial de predicciones: datos enviados y resultado
 CREATE TABLE predicciones (

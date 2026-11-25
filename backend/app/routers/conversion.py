@@ -1,5 +1,5 @@
 from ..models import Prediccion, VersionModelo
-from ..schemas import Metricas, PrediccionSalida, VersionModeloSalida
+from ..schemas import DatasetResumen, Metricas, PrediccionSalida, VersionModeloSalida
 
 ETIQUETAS = {0: "A tiempo", 1: "Entrega tardía"}
 
@@ -23,6 +23,7 @@ def version_a_salida(v: VersionModelo) -> VersionModeloSalida:
         activo=v.activo,
         origen=v.origen,
         fecha_entrenamiento=v.fecha_entrenamiento,
+        datasets=[DatasetResumen(id=d.id, nombre_archivo=d.nombre_archivo, total_registros=d.total_registros) for d in v.datasets],
     )
 
 

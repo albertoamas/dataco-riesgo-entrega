@@ -65,6 +65,12 @@ class CriterioCalidad(BaseModel):
     min_roc_auc: float
 
 
+class DatasetResumen(BaseModel):
+    id: int
+    nombre_archivo: str
+    total_registros: int
+
+
 class VersionModeloSalida(BaseModel):
     version: int
     algoritmo: str
@@ -77,6 +83,7 @@ class VersionModeloSalida(BaseModel):
     activo: bool
     origen: str
     fecha_entrenamiento: datetime
+    datasets: list[DatasetResumen] = Field(default_factory=list, description="Archivos de entrenamiento con los que se entrenó esta versión")
 
 
 class MetricasModeloSalida(VersionModeloSalida):

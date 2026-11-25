@@ -257,7 +257,7 @@ El servicio valida todas las entradas (Tabla 12). La documentación interactiva 
 
 ### Base de datos
 
-La base de datos PostgreSQL 16 se crea únicamente con el script schema.sql del repositorio, que Docker Compose ejecuta al crear el contenedor (Figura 4). Está formada por cuatro tablas (Tabla 13).
+La base de datos PostgreSQL 16 se crea únicamente con el script schema.sql del repositorio, que Docker Compose ejecuta al crear el contenedor (Figura 4). Está formada por cinco tablas (Tabla 13): las dos primeras guardan los datos, las dos siguientes guardan los modelos y sus predicciones, y una tabla intermedia une ambos grupos.
 
 **Figura 4**
 
@@ -274,9 +274,10 @@ La base de datos PostgreSQL 16 se crea únicamente con el script schema.sql del 
 | datasets | Cada archivo de entrenamiento enviado: nombre, formato, cantidad de registros y si está activo |
 | datos_entrenamiento | Los registros preparados, con las trece variables y el objetivo, ligados a su archivo |
 | versiones_modelo | Cada entrenamiento: hiperparámetros, métricas, matriz de confusión, archivo del modelo y si cumple la calidad |
+| versiones_datasets | Tabla intermedia de la relación de muchos a muchos: qué archivos de entrenamiento se usaron en cada versión del modelo |
 | predicciones | Cada predicción: datos enviados, resultado, probabilidad, versión del modelo y fecha |
 
-El script define restricciones de verificación sobre los rangos válidos, claves foráneas entre las tablas y un índice único parcial que garantiza que exista un solo modelo activo a la vez. Para generar la base se ejecuta el comando docker compose up desde la raíz del repositorio y, después, el script de carga inicial del servicio, que inserta los 180.519 registros en unos seis segundos y registra el modelo del cuaderno como versión 1.
+El script define restricciones de verificación sobre los rangos válidos, claves foráneas entre las tablas y un índice único parcial que garantiza que exista un solo modelo activo a la vez. La tabla versiones_datasets resuelve la relación de muchos a muchos entre versiones del modelo y archivos de entrenamiento: una versión se entrena con uno o más archivos, y un archivo puede usarse en varias versiones. Así queda registrado con qué datos exactos se entrenó cada modelo, aunque después esos archivos se reemplacen. Para generar la base se ejecuta el comando docker compose up desde la raíz del repositorio y, después, el script de carga inicial del servicio, que inserta los 180.519 registros en unos seis segundos y registra el modelo del cuaderno como versión 1.
 
 ### Cliente web
 
@@ -329,7 +330,7 @@ Una versión nueva del modelo solo reemplaza a la activa si cumple el criterio d
 
 **[INSERTAR AQUÍ LA FIGURA 9. Archivo: docs/img/figura_9_flujo_reentrenamiento.png]**
 
-Cada predicción guarda los datos enviados, el resultado, la probabilidad y la versión del modelo que la generó, lo que permite auditar las decisiones. Cada entrenamiento produce un archivo de modelo y un registro con sus métricas, y cualquier versión anterior puede volver a activarse desde la API o desde el cliente. Un mecanismo de bloqueo impide dos reentrenamientos simultáneos. El reentrenamiento puede ejecutarse en modo rápido, con los mejores hiperparámetros encontrados en el cuaderno (unos diez segundos), o en modo completo, con GridSearchCV (varios minutos).
+Cada predicción guarda los datos enviados, el resultado, la probabilidad y la versión del modelo que la generó, y cada versión guarda los archivos con que se entrenó. Así es posible auditar cualquier decisión desde la predicción hasta los datos de origen. Cada entrenamiento produce un archivo de modelo y un registro con sus métricas, y cualquier versión anterior puede volver a activarse desde la API o desde el cliente. Un mecanismo de bloqueo impide dos reentrenamientos simultáneos. El reentrenamiento puede ejecutarse en modo rápido, con los mejores hiperparámetros encontrados en el cuaderno (unos diez segundos), o en modo completo, con GridSearchCV (varios minutos).
 
 ## Aseguramiento de la calidad
 
@@ -351,7 +352,7 @@ CRISP-ML(Q) exige identificar los riesgos de cada fase y definir controles para 
 | 5. Despliegue | Entradas inválidas | Validación de tipos, rangos y categorías, y restricciones en la base de datos |
 | 5. Despliegue | Errores en el código | 18 pruebas automatizadas con una base de datos de prueba separada |
 | 6. Monitoreo | Un reentrenamiento empeora el modelo | Control de calidad, versionado y reversión |
-| 6. Monitoreo | Falta de trazabilidad | Registro de los datos, el resultado y la versión de cada predicción |
+| 6. Monitoreo | Falta de trazabilidad | Registro de los datos, el resultado y la versión de cada predicción, y de los archivos con que se entrenó cada versión |
 
 Las 18 pruebas automatizadas, desarrolladas con pytest, cubren la preparación de los datos, el entrenamiento y todos los servicios de la API. Utilizan una base de datos independiente, por lo que no modifican los datos reales.
 

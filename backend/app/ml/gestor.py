@@ -6,7 +6,7 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
-from sqlalchemy import func, select, update
+from sqlalchemy import bindparam, func, select, text, update
 from sqlalchemy.orm import Session
 
 from ..config import settings
@@ -71,7 +71,15 @@ class GestorModelo:
 
     # ---------- Registro inicial del modelo del notebook ----------
     def registrar_modelo_notebook(self, db: Session) -> VersionModelo | None:
-        """Registra modelo.joblib + metricas.json (generados por el notebook) como version 1."""
+        """Registra modelo.joblib + metricas.json (generados por el notebook) como version 1.
+
+        La version 1 queda ligada a los datasets activos. Si el modelo se registro antes de la carga
+        inicial de datos, el vinculo se completa en la siguiente llamada (por ejemplo, desde app.seed).
+        """
+        existente = db.scalar(select(VersionModelo).where(VersionModelo.origen == "notebook"))
+        if existente is not None and not existente.datasets:
+            existente.datasets = datasets_activos(db)
+            db.commit()
         if db.scalar(select(func.count()).select_from(VersionModelo)) > 0:
             return None
         ruta_modelo = self.model_dir / "modelo.joblib"
@@ -98,6 +106,7 @@ class GestorModelo:
             activo=True,
             origen="notebook",
         )
+        version.datasets = datasets_activos(db)
         db.add(version)
         db.commit()
         return version
@@ -108,7 +117,8 @@ class GestorModelo:
             raise EntrenamientoEnCurso("Ya hay un re-entrenamiento en curso")
         try:
             inicio = time.perf_counter()
-            datos = cargar_datos_entrenamiento()
+            usados = datasets_activos(db)
+            datos = cargar_datos_entrenamiento([d.id for d in usados])
             if datos.empty:
                 raise ml.ErrorDatos("No hay datos de entrenamiento activos. Envie un archivo de entrenamiento primero.")
 
@@ -140,6 +150,7 @@ class GestorModelo:
                 activo=False,
                 origen="api",
             )
+            nueva.datasets = usados  # trazabilidad: datos exactos con los que se entreno esta version
             db.add(nueva)
             if activar:
                 db.execute(update(VersionModelo).where(VersionModelo.activo).values(activo=False))
@@ -170,14 +181,20 @@ class GestorModelo:
         return version
 
 
-def cargar_datos_entrenamiento() -> pd.DataFrame:
+def datasets_activos(db: Session) -> list[Dataset]:
+    return list(db.scalars(select(Dataset).where(Dataset.activo).order_by(Dataset.id)))
+
+
+def cargar_datos_entrenamiento(dataset_ids: list[int]) -> pd.DataFrame:
+    """Lee los registros de los datasets indicados (los mismos que quedan ligados a la nueva version)."""
     columnas = ", ".join(f"d.{c}" for c in ml.COLUMNAS + [ml.OBJETIVO])
-    consulta = (
-        f"SELECT {columnas} FROM datos_entrenamiento d "
-        "JOIN datasets s ON s.id = d.dataset_id WHERE s.activo ORDER BY d.id"
-    )
+    if not dataset_ids:
+        return pd.DataFrame(columns=ml.COLUMNAS + [ml.OBJETIVO])
+    consulta = text(
+        f"SELECT {columnas} FROM datos_entrenamiento d WHERE d.dataset_id IN :ids ORDER BY d.id"
+    ).bindparams(bindparam("ids", expanding=True))
     with engine.connect() as conexion:
-        datos = pd.read_sql(consulta, conexion)
+        datos = pd.read_sql(consulta, conexion, params={"ids": dataset_ids})
     for c in ["product_price", "discount_rate"]:
         datos[c] = datos[c].astype(float)
     return datos

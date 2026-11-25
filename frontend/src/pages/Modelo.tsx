@@ -149,6 +149,7 @@ export default function Modelo({ alCambiarModelo }: { alCambiarModelo: () => voi
                     <th>Versión</th>
                     <th>Fecha</th>
                     <th>Origen</th>
+                    <th>Entrenada con</th>
                     <th className="der">Registros</th>
                     <th className="der">Accuracy</th>
                     <th className="der">F1</th>
@@ -165,6 +166,17 @@ export default function Modelo({ alCambiarModelo }: { alCambiarModelo: () => voi
                       </td>
                       <td>{formato.fecha(v.fecha_entrenamiento)}</td>
                       <td>{v.origen === 'notebook' ? 'Notebook' : 'API'}</td>
+                      <td>
+                        {v.datasets.length === 0 ? (
+                          <span style={{ color: 'var(--tinta-3)' }}>Sin registro</span>
+                        ) : (
+                          v.datasets.map((d) => (
+                            <div key={d.id} title={`${formato.entero(d.total_registros)} registros`}>
+                              {d.nombre_archivo}
+                            </div>
+                          ))
+                        )}
+                      </td>
                       <td className="der num">{formato.entero(v.registros_entrenamiento + v.registros_prueba)}</td>
                       <td className="der num">{formato.metrica(v.metricas.accuracy)}</td>
                       <td className="der num">{formato.metrica(v.metricas.f1_score)}</td>
