@@ -9,6 +9,8 @@ PostgreSQL 16. El esquema completo está en [`schema.sql`](schema.sql).
 ```mermaid
 erDiagram
     datasets ||--o{ datos_entrenamiento : "contiene"
+    datasets ||--o{ versiones_datasets : "usado en"
+    versiones_modelo ||--o{ versiones_datasets : "entrenada con"
     versiones_modelo ||--o{ predicciones : "genera"
 
     datasets {
@@ -59,6 +61,11 @@ erDiagram
         TIMESTAMPTZ fecha_entrenamiento
     }
 
+    versiones_datasets {
+        INTEGER version_modelo_id PK, FK
+        INTEGER dataset_id PK, FK
+    }
+
     predicciones {
         BIGSERIAL id PK
         INTEGER version_modelo_id FK
@@ -76,9 +83,10 @@ erDiagram
 | `datasets` | Archivos de entrenamiento enviados al servicio |
 | `datos_entrenamiento` | Registros preparados (13 variables + objetivo) de cada dataset |
 | `versiones_modelo` | Cada entrenamiento del modelo con sus métricas e hiperparámetros |
+| `versiones_datasets` | Tabla intermedia (N a N): con qué archivos de entrenamiento se entrenó cada versión |
 | `predicciones` | Historial de predicciones: datos enviados, resultado y versión del modelo |
 
-**Reglas de integridad:** `CHECK` de rangos y valores válidos, claves foráneas (borrado en cascada de los registros de un dataset), índice único parcial que garantiza **un solo modelo activo** e índices para el historial y el re-entrenamiento.
+**Reglas de integridad:** `CHECK` de rangos y valores válidos, claves foráneas (borrado en cascada de los registros de un dataset), trazabilidad de los datos usados por cada versión, índice único parcial que garantiza **un solo modelo activo** e índices para el historial y el re-entrenamiento.
 
 ## Procedimiento de generación
 
@@ -131,6 +139,13 @@ FROM versiones_modelo WHERE activo;
 SELECT p.id, p.fecha, p.datos_entrada->>'shipping_mode' AS modo, p.prediccion, p.probabilidad, v.version
 FROM predicciones p JOIN versiones_modelo v ON v.id = p.version_modelo_id
 ORDER BY p.fecha DESC LIMIT 10;
+
+-- Con qué archivos se entrenó cada versión
+SELECT v.version, d.nombre_archivo, d.total_registros
+FROM versiones_datasets vd
+JOIN versiones_modelo v ON v.id = vd.version_modelo_id
+JOIN datasets d ON d.id = vd.dataset_id
+ORDER BY v.version;
 
 -- Registros activos para entrenar
 SELECT s.nombre_archivo, count(*) FROM datos_entrenamiento d

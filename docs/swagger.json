@@ -632,6 +632,29 @@
         ],
         "title": "CriterioCalidad"
       },
+      "DatasetResumen": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nombre_archivo": {
+            "type": "string",
+            "title": "Nombre Archivo"
+          },
+          "total_registros": {
+            "type": "integer",
+            "title": "Total Registros"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre_archivo",
+          "total_registros"
+        ],
+        "title": "DatasetResumen"
+      },
       "DatasetSalida": {
         "properties": {
           "id": {
@@ -836,6 +859,14 @@
             "type": "string",
             "format": "date-time",
             "title": "Fecha Entrenamiento"
+          },
+          "datasets": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetResumen"
+            },
+            "type": "array",
+            "title": "Datasets",
+            "description": "Archivos de entrenamiento con los que se entrenó esta versión"
           },
           "criterio_calidad": {
             "$ref": "#/components/schemas/CriterioCalidad"
@@ -1212,6 +1243,14 @@
             "type": "string",
             "format": "date-time",
             "title": "Fecha Entrenamiento"
+          },
+          "datasets": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetResumen"
+            },
+            "type": "array",
+            "title": "Datasets",
+            "description": "Archivos de entrenamiento con los que se entrenó esta versión"
           }
         },
         "type": "object",

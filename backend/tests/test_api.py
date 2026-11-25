@@ -86,6 +86,7 @@ def test_carga_y_reentrenamiento(client, csv_preparado):
     )
     assert r.status_code == 201, r.text
     assert r.json()["dataset"]["formato"] == "preparado"
+    dataset_id = r.json()["dataset"]["id"]
     destinos = client.get("/api/destinos").json()
     assert {"market": "LATAM", "order_region": "South America", "order_country": "Brasil"} in destinos
 
@@ -95,6 +96,8 @@ def test_carga_y_reentrenamiento(client, csv_preparado):
     assert cuerpo["activado"] is False
     assert cuerpo["nueva_version"]["version"] == 2
     assert cuerpo["version_anterior"]["version"] == 1
+    # Trazabilidad: la nueva versión queda ligada al dataset con el que se entrenó
+    assert [d["id"] for d in cuerpo["nueva_version"]["datasets"]] == [dataset_id]
 
     modelos = client.get("/api/modelos").json()
     assert [m["version"] for m in modelos] == [2, 1]
@@ -107,3 +110,20 @@ def test_activar_version(client):
     assert client.get("/api/salud").json()["version_modelo"] == 2
     client.post("/api/modelos/1/activar")
     assert client.post("/api/modelos/99/activar").status_code == 404
+
+
+def test_reentrenamiento_solo_usa_y_registra_datasets_activos(client, csv_preparado):
+    """Al reemplazar los datos, la versión nueva se liga solo al archivo nuevo y la anterior conserva el suyo."""
+    anterior = client.get("/api/modelos").json()[0]
+    r = client.post(
+        "/api/datasets",
+        files={"archivo": ("nuevo.csv", csv_preparado, "text/csv")},
+        data={"modo": "reemplazar", "reentrenar": "true"},
+    )
+    assert r.status_code == 201, r.text
+    nuevo_id = r.json()["dataset"]["id"]
+    nueva = r.json()["reentrenamiento"]["nueva_version"]
+    assert [d["id"] for d in nueva["datasets"]] == [nuevo_id]
+
+    versiones = {m["version"]: m for m in client.get("/api/modelos").json()}
+    assert versiones[anterior["version"]]["datasets"] == anterior["datasets"]

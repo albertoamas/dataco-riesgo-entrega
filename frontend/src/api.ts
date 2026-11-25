@@ -61,6 +61,7 @@ export interface VersionModelo {
   activo: boolean
   origen: 'notebook' | 'api'
   fecha_entrenamiento: string
+  datasets: { id: number; nombre_archivo: string; total_registros: number }[]
 }
 
 export interface MetricasModelo extends VersionModelo {

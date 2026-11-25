@@ -2,13 +2,21 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import JSON, BigInteger, DateTime, ForeignKey, Numeric, SmallInteger, String, func
+from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, Integer, Numeric, SmallInteger, String, Table, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
 
 JsonType = JSON().with_variant(JSONB(), "postgresql")
+
+# Trazabilidad: con qué archivos de entrenamiento se entrenó cada versión (N a N)
+versiones_datasets = Table(
+    "versiones_datasets",
+    Base.metadata,
+    Column("version_modelo_id", Integer, ForeignKey("versiones_modelo.id", ondelete="CASCADE"), primary_key=True),
+    Column("dataset_id", Integer, ForeignKey("datasets.id", ondelete="CASCADE"), primary_key=True),
+)
 
 
 class Dataset(Base):
@@ -63,6 +71,8 @@ class VersionModelo(Base):
     activo: Mapped[bool] = mapped_column(default=False)
     origen: Mapped[str] = mapped_column(String(20), default="api")
     fecha_entrenamiento: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    datasets: Mapped[list[Dataset]] = relationship(secondary=versiones_datasets, lazy="selectin", order_by=Dataset.id)
 
 
 class Prediccion(Base):
